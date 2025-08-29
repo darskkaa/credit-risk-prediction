@@ -1,0 +1,21 @@
+symbol,name,exchange,exchangeShortName,type
+AAPL,Apple Inc.,NASDAQ,NASDAQ,stock
+MSFT,Microsoft Corporation,NASDAQ,NASDAQ,stock
+GOOGL,Alphabet Inc.,NASDAQ,NASDAQ,stock
+AMZN,Amazon.com Inc.,NASDAQ,NASDAQ,stock
+TSLA,Tesla Inc.,NASDAQ,NASDAQ,stock
+META,Meta Platforms Inc.,NASDAQ,NASDAQ,stock
+NVDA,NVIDIA Corporation,NASDAQ,NASDAQ,stock
+JPM,JPMorgan Chase & Co.,NYSE,NYSE,stock
+JNJ,Johnson & Johnson,NYSE,NYSE,stock
+V,Visa Inc.,NYSE,NYSE,stock
+PG,Procter & Gamble Co.,NYSE,NYSE,stock
+HD,Home Depot Inc.,NYSE,NYSE,stock
+MA,Mastercard Inc.,NYSE,NYSE,stock
+BAC,Bank of America Corp.,NYSE,NYSE,stock
+DIS,Walt Disney Co.,NYSE,NYSE,stock
+ADBE,Adobe Inc.,NASDAQ,NASDAQ,stock
+NFLX,Netflix Inc.,NASDAQ,NASDAQ,stock
+CRM,Salesforce Inc.,NYSE,NYSE,stock
+XOM,Exxon Mobil Corp.,NYSE,NYSE,stock
+WMT,Walmart Inc.,NYSE,NYSE,stock

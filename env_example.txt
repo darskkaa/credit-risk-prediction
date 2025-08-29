@@ -1,0 +1,8 @@
+# Financial Modeling Prep (FMP) API Configuration
+# Get your free API key from: https://financialmodelingprep.com/developer/docs/
+FMP_API_KEY=your_api_key_here
+
+# Optional: Override default settings
+# MAX_COMPANIES=100
+# REQUEST_DELAY=1.0
+# FLASK_DEBUG=False

@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎯 Credit Default Risk Prediction - Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1f77b4 0%, #2c3e50 100%);
+            color: white;
+            text-align: center;
+            padding: 30px;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #e9ecef;
+        }
+        
+        .tab {
+            padding: 15px 30px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+        
+        .tab.active {
+            border-bottom-color: #3498db;
+            color: #3498db;
+        }
+        
+        .tab:hover {
+            background: #f8f9fa;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .form-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            border-left: 4px solid #3498db;
+            margin-bottom: 30px;
+        }
+        
+        .form-section h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: block;
+            margin: 0 auto;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .results {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            border: 1px solid #e9ecef;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-top: 30px;
+            display: none;
+        }
+        
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .metric-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .metric-card h4 {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+        
+        .metric-card .value {
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+        
+        .risk-low { color: #27ae60; }
+        .risk-moderate { color: #f39c12; }
+        .risk-high { color: #e74c3c; }
+        
+        .chart-container {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        
+        .chart-placeholder {
+            height: 300px;
+            background: linear-gradient(45deg, #e9ecef 25%, transparent 25%), 
+                        linear-gradient(-45deg, #e9ecef 25%, transparent 25%), 
+                        linear-gradient(45deg, transparent 75%, #e9ecef 75%), 
+                        linear-gradient(-45deg, transparent 75%, #e9ecef 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6c757d;
+            font-size: 1.1rem;
+        }
+        
+        .about-content {
+            line-height: 1.6;
+            color: #2c3e50;
+        }
+        
+        .about-content h3 {
+            color: #1f77b4;
+            margin: 20px 0 10px 0;
+        }
+        
+        .about-content ul {
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .status-bar {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status-warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 Credit Default Risk Prediction</h1>
+            <p>Professional Financial Risk Assessment System</p>
+        </div>
+        
+        <div class="content">
+            <div class="status-bar status-success">
+                ✅ System Ready - Demo Mode Active
+            </div>
+            
+            <div class="tabs">
+                <div class="tab active" onclick="showTab('prediction')">📊 Risk Prediction</div>
+                <div class="tab" onclick="showTab('analysis')">🏢 Company Analysis</div>
+                <div class="tab" onclick="showTab('about')">📈 About</div>
+            </div>
+            
+            <!-- Risk Prediction Tab -->
+            <div id="prediction" class="tab-content active">
+                <div class="form-section">
+                    <h3>📊 Financial Data Input</h3>
+                    <div class="form-grid">
+                        <div>
+                            <h4 style="color: #2c3e50; margin-bottom: 15px;">Balance Sheet Metrics</h4>
+                            <div class="form-group">
+                                <label for="total_assets">Total Assets ($)</label>
+                                <input type="number" id="total_assets" value="1000000" min="0">
+                            </div>
+                            <div class="form-group">
+                                <label for="total_liabilities">Total Liabilities ($)</label>
+                                <input type="number" id="total_liabilities" value="600000" min="0">
+                            </div>
+                            <div class="form-group">
+                                <label for="total_equity">Total Equity ($)</label>
+                                <input type="number" id="total_equity" value="400000" min="0">
+                            </div>
+                            <div class="form-group">
+                                <label for="current_assets">Current Assets ($)</label>
+                                <input type="number" id="current_assets" value="300000" min="0">
+                            </div>
+                            <div class="form-group">
+                                <label for="current_liabilities">Current Liabilities ($)</label>
+                                <input type="number" id="current_liabilities" value="200000" min="0">
+                            </div>
+                        </div>
+                        <div>
+                            <h4 style="color: #2c3e50; margin-bottom: 15px;">Income Statement Metrics</h4>
+                            <div class="form-group">
+                                <label for="revenue">Total Revenue ($)</label>
+                                <input type="number" id="revenue" value="2000000" min="0">
+                            </div>
+                            <div class="form-group">
+                                <label for="operating_income">Operating Income ($)</label>
+                                <input type="number" id="operating_income" value="300000">
+                            </div>
+                            <div class="form-group">
+                                <label for="net_income">Net Income ($)</label>
+                                <input type="number" id="net_income" value="200000">
+                            </div>
+                            <div class="form-group">
+                                <label for="interest_expense">Interest Expense ($)</label>
+                                <input type="number" id="interest_expense" value="50000" min="0">
+                            </div>
+                            <div class="form-group">
+                                <label for="ebitda">EBITDA ($)</label>
+                                <input type="number" id="ebitda" value="400000">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button class="btn" onclick="predictRisk()">🚀 Predict Risk</button>
+                </div>
+                
+                <div id="results" class="results">
+                    <h3 style="color: #2c3e50; margin-bottom: 20px;">🎯 Risk Assessment Results</h3>
+                    
+                    <div class="metrics-grid">
+                        <div class="metric-card">
+                            <h4>Risk Score</h4>
+                            <div class="value" id="risk_score">--</div>
+                        </div>
+                        <div class="metric-card">
+                            <h4>Risk Category</h4>
+                            <div class="value" id="risk_category">--</div>
+                        </div>
+                        <div class="metric-card">
+                            <h4>Confidence</h4>
+                            <div class="value" id="confidence">--</div>
+                        </div>
+                        <div class="metric-card">
+                            <h4>Debt Ratio</h4>
+                            <div class="value" id="debt_ratio">--</div>
+                        </div>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <h4 style="color: #2c3e50; margin-bottom: 15px;">📊 Feature Contribution Analysis</h4>
+                        <div class="chart-placeholder">
+                            Interactive Chart: Feature Contributions to Risk Score
+                        </div>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <h4 style="color: #2c3e50; margin-bottom: 15px;">📈 Key Financial Ratios</h4>
+                        <div class="chart-placeholder">
+                            Financial Ratios: Current Ratio, Debt-to-Equity, ROA, ROE
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Company Analysis Tab -->
+            <div id="analysis" class="tab-content">
+                <div class="form-section">
+                    <h3>🏢 Company Information</h3>
+                    <div class="form-group">
+                        <label for="ticker">Company Ticker Symbol</label>
+                        <input type="text" id="ticker" placeholder="e.g., AAPL, MSFT, GOOGL">
+                    </div>
+                    <button class="btn" onclick="fetchCompanyData()">📈 Fetch Data</button>
+                </div>
+                
+                <div id="company_results" class="results">
+                    <h3 style="color: #2c3e50; margin-bottom: 20px;">📈 Historical Analysis</h3>
+                    <div class="chart-container">
+                        <h4 style="color: #2c3e50; margin-bottom: 15px;">Financial Metrics Over Time</h4>
+                        <div class="chart-placeholder">
+                            Time Series Chart: Assets, Liabilities, Revenue, Net Income
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <h4 style="color: #2c3e50; margin-bottom: 15px;">Financial Ratios Trend</h4>
+                        <div class="chart-placeholder">
+                            Trend Analysis: Debt Ratios, Liquidity, Profitability
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- About Tab -->
+            <div id="about" class="tab-content">
+                <div class="about-content">
+                    <h3>🎯 About This System</h3>
+                    <p><strong>Credit Default Risk Prediction Model</strong> is a comprehensive machine learning system that analyzes corporate financial data to predict the likelihood of credit default.</p>
+                    
+                    <h3>🔬 How It Works</h3>
+                    <ol>
+                        <li><strong>Data Input:</strong> Financial metrics are collected from user input or API sources</li>
+                        <li><strong>Feature Engineering:</strong> Key financial ratios are calculated automatically</li>
+                        <li><strong>ML Prediction:</strong> Advanced algorithms analyze the data and generate risk scores</li>
+                        <li><strong>Interpretability:</strong> Feature contribution analysis explains the model's decisions</li>
+                    </ol>
+                    
+                    <h3>📊 Key Features</h3>
+                    <ul>
+                        <li><strong>Real-time Analysis:</strong> Instant risk assessment</li>
+                        <li><strong>Multiple Data Sources:</strong> Manual input or FMP API integration</li>
+                        <li><strong>Comprehensive Metrics:</strong> 10+ key financial indicators</li>
+                        <li><strong>Visual Insights:</strong> Charts and graphs for better understanding</li>
+                        <li><strong>Professional Grade:</strong> Production-ready ML pipeline</li>
+                    </ul>
+                    
+                    <h3>🛠️ Technical Details</h3>
+                    <ul>
+                        <li><strong>Framework:</strong> Streamlit web application + Flask API</li>
+                        <li><strong>ML Models:</strong> Logistic Regression, Random Forest, XGBoost</li>
+                        <li><strong>Data Source:</strong> Financial Modeling Prep (FMP) API</li>
+                        <li><strong>Visualization:</strong> Plotly interactive charts</li>
+                        <li><strong>Architecture:</strong> Modular, scalable design</li>
+                    </ul>
+                    
+                    <h3>📈 Business Value</h3>
+                    <ul>
+                        <li><strong>Risk Assessment:</strong> Identify potential credit risks early</li>
+                        <li><strong>Decision Support:</strong> Data-driven lending decisions</li>
+                        <li><strong>Compliance:</strong> Regulatory risk management</li>
+                        <li><strong>Efficiency:</strong> Automated financial analysis</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function showTab(tabName) {
+            // Hide all tab contents
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => content.classList.remove('active'));
+            
+            // Remove active class from all tabs
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // Show selected tab content
+            document.getElementById(tabName).classList.add('active');
+            
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+        }
+        
+        function predictRisk() {
+            // Get input values
+            const totalAssets = parseFloat(document.getElementById('total_assets').value);
+            const totalLiabilities = parseFloat(document.getElementById('total_liabilities').value);
+            const totalEquity = parseFloat(document.getElementById('total_equity').value);
+            const currentAssets = parseFloat(document.getElementById('current_assets').value);
+            const currentLiabilities = parseFloat(document.getElementById('current_liabilities').value);
+            const revenue = parseFloat(document.getElementById('revenue').value);
+            const operatingIncome = parseFloat(document.getElementById('operating_income').value);
+            const netIncome = parseFloat(document.getElementById('net_income').value);
+            const interestExpense = parseFloat(document.getElementById('interest_expense').value);
+            const ebitda = parseFloat(document.getElementById('ebitda').value);
+            
+            // Calculate risk indicators
+            const debtRatio = totalLiabilities / totalAssets;
+            const currentRatio = currentAssets / currentLiabilities;
+            const roa = netIncome / totalAssets;
+            
+            // Simulate risk score
+            let riskScore = 0.0;
+            
+            if (debtRatio > 0.7) riskScore += 0.4;
+            else if (debtRatio > 0.5) riskScore += 0.2;
+            else if (debtRatio > 0.3) riskScore += 0.1;
+            
+            if (currentRatio < 1.0) riskScore += 0.3;
+            else if (currentRatio < 1.5) riskScore += 0.15;
+            
+            if (roa < 0) riskScore += 0.3;
+            else if (roa < 0.05) riskScore += 0.1;
+            
+            // Add some randomness for demo
+            riskScore += (Math.random() - 0.5) * 0.1;
+            riskScore = Math.max(0.0, Math.min(1.0, riskScore));
+            
+            // Determine risk category
+            let riskCategory, riskClass;
+            if (riskScore < 0.3) {
+                riskCategory = "Low Risk";
+                riskClass = "risk-low";
+            } else if (riskScore < 0.6) {
+                riskCategory = "Moderate Risk";
+                riskClass = "risk-moderate";
+            } else {
+                riskCategory = "High Risk";
+                riskClass = "risk-high";
+            }
+            
+            // Calculate confidence
+            const confidence = 0.85 + (Math.random() - 0.5) * 0.1;
+            
+            // Display results
+            document.getElementById('risk_score').textContent = (riskScore * 100).toFixed(1) + '%';
+            document.getElementById('risk_category').textContent = riskCategory;
+            document.getElementById('risk_category').className = 'value ' + riskClass;
+            document.getElementById('confidence').textContent = (confidence * 100).toFixed(1) + '%';
+            document.getElementById('debt_ratio').textContent = (debtRatio * 100).toFixed(1) + '%';
+            
+            // Show results
+            document.getElementById('results').style.display = 'block';
+            
+            // Scroll to results
+            document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function fetchCompanyData() {
+            const ticker = document.getElementById('ticker').value;
+            if (ticker) {
+                // Simulate API call
+                setTimeout(() => {
+                    document.getElementById('company_results').style.display = 'block';
+                    document.getElementById('company_results').scrollIntoView({ behavior: 'smooth' });
+                }, 1000);
+            } else {
+                alert('Please enter a ticker symbol');
+            }
+        }
+    </script>
+</body>
+</html>
