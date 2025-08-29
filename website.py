@@ -14,6 +14,7 @@ from flask import Flask, render_template, request, jsonify, redirect, url_for
 from flask_cors import CORS
 import logging
 import joblib
+import numpy as np
 from sklearn.preprocessing import StandardScaler
 
 # Setup logging
@@ -34,9 +35,28 @@ class FinancialAnalyzer:
         self.load_ml_models()
         
     def load_ml_models(self):
-        """Initialize industry-standard risk assessment system"""
-        logger.info("Industry-standard risk assessment system initialized")
-        logger.info("Using real credit ratings and comprehensive financial analysis")
+        """Load trained ML models for credit risk prediction"""
+        try:
+            # Load trained models
+            self.models = {}
+            self.models['logistic_regression'] = joblib.load('models/logistic_regression.pkl')
+            self.models['random_forest'] = joblib.load('models/random_forest.pkl')
+            self.models['gradient_boosting'] = joblib.load('models/gradient_boosting.pkl')
+            
+            # Load scaler and feature names
+            self.scaler = joblib.load('models/scaler.pkl')
+            self.feature_names = joblib.load('models/feature_names.pkl')
+            
+            logger.info("✅ ML models loaded successfully!")
+            logger.info(f"🤖 Available models: {list(self.models.keys())}")
+            logger.info(f"📊 Features: {len(self.feature_names)} financial indicators")
+            
+        except Exception as e:
+            logger.warning(f"⚠️ Could not load ML models: {e}")
+            logger.info("🔄 Falling back to industry-standard risk assessment")
+            self.models = None
+            self.scaler = None
+            self.feature_names = None
         
     def test_api_connection(self):
         """Test if FMP API is working using a simple endpoint"""
@@ -201,17 +221,29 @@ class FinancialAnalyzer:
         }
     
     def calculate_risk_score(self, financial_data, ticker=None):
-        """Calculate credit default risk score using industry-standard financial analysis"""
+        """Calculate credit default risk score using ML models or industry-standard analysis"""
         try:
             # Extract latest financial data
             latest_income = financial_data['income'][0] if financial_data['income'] else {}
             latest_balance = financial_data['balance'][0] if financial_data['balance'] else {}
             latest_cashflow = financial_data['cashflow'][0] if financial_data['cashflow'] else {}
             
-            # Use industry-standard credit risk assessment
-            final_risk, risk_category, risk_color, confidence, model_type = self.industry_standard_risk_assessment(
-                latest_income, latest_balance, latest_cashflow, ticker
-            )
+            # Try ML prediction first, fall back to industry standard
+            if self.models is not None and self.scaler is not None:
+                try:
+                    final_risk, risk_category, risk_color, confidence, model_type = self.ml_risk_prediction(
+                        latest_income, latest_balance, latest_cashflow, ticker
+                    )
+                except Exception as e:
+                    logger.warning(f"ML prediction failed: {e}, using industry standard")
+                    final_risk, risk_category, risk_color, confidence, model_type = self.industry_standard_risk_assessment(
+                        latest_income, latest_balance, latest_cashflow, ticker
+                    )
+            else:
+                # Use industry-standard credit risk assessment
+                final_risk, risk_category, risk_color, confidence, model_type = self.industry_standard_risk_assessment(
+                    latest_income, latest_balance, latest_cashflow, ticker
+                )
             
             # Calculate display ratios
             total_assets = latest_balance.get('totalAssets', 1)
@@ -270,8 +302,126 @@ class FinancialAnalyzer:
                 'ratios': {},
                 'feature_contributions': {},
                 'model_type': 'Error'
+                    }
+    
+    def ml_risk_prediction(self, income, balance, cashflow, ticker):
+        """ML-based credit risk prediction using trained models"""
+        try:
+            # Engineer features for ML model
+            features = self.engineer_ml_features(income, balance, cashflow, ticker)
+            
+            # Create feature vector in the correct order
+            feature_vector = []
+            for feature_name in self.feature_names:
+                feature_vector.append(features.get(feature_name, 0))
+            
+            # Convert to numpy array and reshape
+            X = np.array(feature_vector).reshape(1, -1)
+            
+            # Scale features
+            X_scaled = self.scaler.transform(X)
+            
+            # Get predictions from all models
+            predictions = {}
+            for model_name, model_data in self.models.items():
+                model = model_data['model']
+                pred_proba = model.predict_proba(X_scaled)[0, 1]  # Probability of default (class 1)
+                predictions[model_name] = pred_proba
+            
+            # Ensemble prediction (weighted average based on CV performance)
+            weights = {
+                'logistic_regression': 0.3,
+                'random_forest': 0.4,
+                'gradient_boosting': 0.3
             }
             
+            final_risk = sum(predictions[model] * weights[model] for model in predictions)
+            
+            # Calculate confidence based on agreement between models
+            pred_values = list(predictions.values())
+            std_dev = np.std(pred_values)
+            confidence = max(0.6, 1.0 - (std_dev * 2))  # Higher agreement = higher confidence
+            
+            # Determine risk category
+            if final_risk < 0.25:
+                risk_category = "Low Risk"
+                risk_color = "success"
+            elif final_risk < 0.55:
+                risk_category = "Moderate Risk"
+                risk_color = "warning"
+            else:
+                risk_category = "High Risk"
+                risk_color = "danger"
+            
+            model_type = f"ML Ensemble (LR: {predictions['logistic_regression']:.3f}, RF: {predictions['random_forest']:.3f}, GB: {predictions['gradient_boosting']:.3f})"
+            
+            logger.info(f"🤖 ML Prediction for {ticker}: {final_risk:.3f} ({risk_category})")
+            
+            return final_risk, risk_category, risk_color, confidence, model_type
+            
+        except Exception as e:
+            logger.error(f"ML prediction error: {e}")
+            raise e
+    
+    def engineer_ml_features(self, income, balance, cashflow, ticker):
+        """Engineer features for ML model"""
+        try:
+            # Get financial metrics
+            total_assets = balance.get('totalAssets', 1)
+            total_liabilities = balance.get('totalLiabilities', 0)
+            total_equity = balance.get('totalEquity', 1)
+            current_assets = balance.get('currentAssets', 0)
+            current_liabilities = balance.get('currentLiabilities', 1)
+            
+            revenue = income.get('revenue', 1)
+            net_income = income.get('netIncome', 0)
+            operating_income = income.get('operatingIncome', 0)
+            interest_expense = income.get('interestExpense', 1)
+            ebitda = income.get('ebitda', 0)
+            
+            operating_cf = cashflow.get('operatingCashFlow', 0)
+            investing_cf = cashflow.get('investingCashFlow', 0)
+            
+            # Calculate ratios (same as in training)
+            features = {
+                'debt_ratio': total_liabilities / max(total_assets, 1),
+                'current_ratio': current_assets / max(current_liabilities, 1),
+                'roa': net_income / max(total_assets, 1),
+                'roe': net_income / max(total_equity, 1),
+                'interest_coverage': operating_income / max(interest_expense, 1),
+                'profit_margin': net_income / max(revenue, 1),
+                'operating_margin': operating_income / max(revenue, 1),
+                'ebitda_margin': ebitda / max(revenue, 1),
+                'asset_turnover': revenue / max(total_assets, 1),
+                'debt_to_equity': total_liabilities / max(total_equity, 1),
+                'equity_ratio': total_equity / max(total_assets, 1),
+                'working_capital_ratio': (current_assets - current_liabilities) / max(total_assets, 1),
+                'asset_quality': operating_income / max(total_assets, 1),
+                'cash_coverage': operating_cf / max(interest_expense, 1),
+                'operating_cf_ratio': operating_cf / max(revenue, 1),
+                'free_cash_flow_ratio': (operating_cf + investing_cf) / max(revenue, 1),
+                'cash_flow_coverage': operating_cf / max(current_liabilities, 1),
+                'log_total_assets': np.log(max(total_assets, 1)),
+                'log_revenue': np.log(max(revenue, 1)),
+                'cf_to_debt': operating_cf / max(total_liabilities, 1),
+                'earnings_quality': operating_cf / max(net_income, 1) if net_income > 0 else 0,
+                'is_tech': 1 if ticker and ticker.upper() in ['AAPL', 'MSFT', 'GOOGL', 'GOOG', 'META', 'AMZN', 'NFLX', 'NVDA', 'TSLA'] else 0,
+                'is_ecommerce': 1 if ticker and ticker.upper() in ['AMZN', 'EBAY', 'ETSY', 'SHOP'] else 0,
+            }
+            
+            # Handle infinite and NaN values
+            for k, v in features.items():
+                if np.isinf(v):
+                    features[k] = 1e9 if v > 0 else -1e9
+                if np.isnan(v):
+                    features[k] = 0
+                    
+            return features
+            
+        except Exception as e:
+            logger.error(f"Feature engineering error: {e}")
+            raise e
+    
     def industry_standard_risk_assessment(self, income, balance, cashflow, ticker):
         """Industry-standard credit risk assessment based on real financial analysis"""
         try:
