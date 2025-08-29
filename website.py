@@ -613,12 +613,16 @@ def company_risk(ticker):
         }), 500
 
 if __name__ == '__main__':
+    import os
+    # Get port from environment variable for deployment platforms
+    port = int(os.environ.get('PORT', 5000))
+    
     # Set environment variable if provided
     if FMP_API_KEY:
         os.environ['FMP_API_KEY'] = FMP_API_KEY
     
     print("Starting Credit Default Risk Prediction Website...")
-    print(f"Website will be available at: http://localhost:5000")
+    print(f"Website will be available at: http://localhost:{port}")
     if FMP_API_KEY:
         print(f"FMP API Key: {FMP_API_KEY[:8]}...")
     else:
@@ -635,4 +639,6 @@ if __name__ == '__main__':
     else:
         print("Using demo data mode")
     
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    # Use debug=False for production
+    debug_mode = os.environ.get('FLASK_DEBUG', 'False').lower() == 'true'
+    app.run(debug=debug_mode, host='0.0.0.0', port=port)
