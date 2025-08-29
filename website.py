@@ -47,13 +47,13 @@ class FinancialAnalyzer:
             self.scaler = joblib.load('models/scaler.pkl')
             self.feature_names = joblib.load('models/feature_names.pkl')
             
-            logger.info("✅ ML models loaded successfully!")
-            logger.info(f"🤖 Available models: {list(self.models.keys())}")
-            logger.info(f"📊 Features: {len(self.feature_names)} financial indicators")
+            logger.info("ML models loaded successfully!")
+            logger.info(f"Available models: {list(self.models.keys())}")
+            logger.info(f"Features: {len(self.feature_names)} financial indicators")
             
         except Exception as e:
-            logger.warning(f"⚠️ Could not load ML models: {e}")
-            logger.info("🔄 Falling back to industry-standard risk assessment")
+            logger.warning(f"Could not load ML models: {e}")
+            logger.info("Falling back to industry-standard risk assessment")
             self.models = None
             self.scaler = None
             self.feature_names = None
@@ -355,7 +355,7 @@ class FinancialAnalyzer:
             
             model_type = f"ML Ensemble (LR: {predictions['logistic_regression']:.3f}, RF: {predictions['random_forest']:.3f}, GB: {predictions['gradient_boosting']:.3f})"
             
-            logger.info(f"🤖 ML Prediction for {ticker}: {final_risk:.3f} ({risk_category})")
+            logger.info(f"ML Prediction for {ticker}: {final_risk:.3f} ({risk_category})")
             
             return final_risk, risk_category, risk_color, confidence, model_type
             

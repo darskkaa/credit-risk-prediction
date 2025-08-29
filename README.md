@@ -3,7 +3,7 @@
 ## Technical Overview
 A production-grade machine learning system implementing ensemble-based credit default prediction using supervised learning algorithms trained on corporate financial statements. The system integrates real-time financial data ingestion, feature engineering pipeline, and probabilistic risk assessment with confidence intervals.
 
-## 🤖 Machine Learning Architecture
+## Machine Learning Architecture
 
 ### Ensemble Model Composition
 The system implements a **heterogeneous ensemble** combining three distinct algorithms:
@@ -35,7 +35,7 @@ P_ensemble = 0.3 × P_LR + 0.4 × P_RF + 0.3 × P_GB
 ```
 Weights determined by 5-fold cross-validation AUC performance on training data.
 
-## 🔬 Feature Engineering Pipeline
+## Feature Engineering Pipeline
 
 ### Financial Ratio Categories (22 Engineered Features)
 
@@ -81,7 +81,7 @@ Weights determined by 5-fold cross-validation AUC performance on training data.
    - `X_scaled = (X - μ) / σ`
 5. **Feature Selection**: Correlation-based redundancy removal (|r| > 0.95)
 
-## 🎯 Model Training & Validation
+## Model Training & Validation
 
 ### Training Methodology
 - **Dataset**: 4 major corporations (AAPL, MSFT, GOOGL, AMZN) with 5-year historical data
@@ -97,7 +97,7 @@ Weights determined by 5-fold cross-validation AUC performance on training data.
   - High Risk: P(default) ≥ 0.55
 - **Confidence Scoring**: `confidence = max(0.6, 1.0 - 2×σ)` where σ is std dev of ensemble predictions
 
-## 🏗️ System Architecture
+## System Architecture
 
 ### Backend Components
 - **Flask Application Server**: RESTful API with CORS support
@@ -118,7 +118,7 @@ Weights determined by 5-fold cross-validation AUC performance on training data.
 - **Data Source**: Financial Modeling Prep API
 - **Deployment**: Docker-compatible, environment variable configuration
 
-## 🧮 Mathematical Formulations
+## Mathematical Formulations
 
 ### Ensemble Confidence Calculation
 The system calculates prediction confidence using inter-model agreement:
@@ -148,7 +148,7 @@ J = Sensitivity + Specificity - 1 = TPR - FPR
 ```
 Maximizing J-statistic balances true positive and false positive rates.
 
-## 📊 Performance Benchmarks
+## Performance Benchmarks
 
 ### Cross-Validation Results
 ```
@@ -166,7 +166,7 @@ Ensemble Average    0.901      0.889      0.867     0.878
 4. **Current Ratio** (0.112) - Short-term liquidity
 5. **Operating Cash Flow Ratio** (0.098) - Cash generation ability
 
-## 🔧 Installation & Setup
+## Installation & Setup
 
 ### Prerequisites
 ```bash
@@ -214,7 +214,7 @@ docker build -t credit-risk-app .
 docker run -p 5000:5000 -e FMP_API_KEY=your_key credit-risk-app
 ```
 
-## 🚀 Production Deployment
+## Production Deployment
 
 ### Environment Configuration
 ```bash
@@ -242,7 +242,7 @@ FREE_TIER_LIMIT = 250  # requests/day
 RATE_LIMIT = 5         # requests/minute
 ```
 
-## 📈 Usage Examples
+## Usage Examples
 
 ### Programmatic API Access
 ```python
@@ -269,7 +269,7 @@ company_data = response.json()
 print(f"ML Prediction: {company_data['risk_assessment']['model_type']}")
 ```
 
-## 🔬 Model Interpretability
+## Model Interpretability
 
 ### SHAP (SHapley Additive exPlanations) Values
 ```python
@@ -281,7 +281,7 @@ feature_importance = np.abs(shap_values).mean(0)
 ### Partial Dependence Plots
 Visualize feature impact on prediction probability across feature value ranges.
 
-## 📁 Technical Architecture
+## Technical Architecture
 
 ```
 ├── models/                    # Serialized ML models
@@ -301,7 +301,7 @@ Visualize feature impact on prediction probability across feature value ranges.
 └── config.py                  # Configuration management
 ```
 
-## 🔐 Security Considerations
+## Security Considerations
 
 - **API Key Management**: Environment variables, no hardcoded credentials
 - **Input Validation**: Pandas data type enforcement, range checking
@@ -309,7 +309,7 @@ Visualize feature impact on prediction probability across feature value ranges.
 - **Error Handling**: Graceful degradation, no sensitive data exposure
 - **CORS Policy**: Restricted cross-origin requests
 
-## 📝 License & Citations
+## License & Citations
 
 This project is for educational and research purposes. If used in academic work, please cite:
 
